@@ -80,6 +80,14 @@ func NewBall(pos geom.Point, radius, vx, vy, vz, gravity float64, cfg BallConfig
 	}
 }
 
+func (b *Ball) Stop() {
+	b.VX = 0
+	b.VY = 0
+	b.VZ = 0
+	b.Z = 0
+	b.Bouncing = false
+}
+
 // return true if stopped at target
 func (b *Ball) Update() bool {
 	dt := 1.0 / ebiten.ActualTPS()
