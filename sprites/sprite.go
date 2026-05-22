@@ -14,6 +14,8 @@ type Sprite struct {
 	target *geom.Point // Destination. stop if nil
 
 	cfg SpriteConfig
+
+	Arrived bool
 }
 
 type SpriteConfig struct {
@@ -39,7 +41,12 @@ func NewSprite(pt geom.Point, speed float64, target *geom.Point, cfg *SpriteConf
 	}
 }
 
+func (s *Sprite) GetTarget() *geom.Point {
+	return s.target
+}
+
 func (s *Sprite) SetTarget(p *geom.Point) {
+	s.Arrived = false
 	if p == nil {
 		s.target = nil
 		return
@@ -51,6 +58,7 @@ func (s *Sprite) SetTarget(p *geom.Point) {
 }
 
 func (s *Sprite) ClearTarget() {
+	s.Arrived = false
 	s.target = nil
 }
 
@@ -67,7 +75,8 @@ func (s *Sprite) Update() bool {
 	if dsq <= s.cfg.DistanceSQArrived {
 		s.X = s.target.X
 		s.Y = s.target.Y
-		s.target = nil
+		// s.target = nil
+		s.Arrived = true
 		return true
 	}
 

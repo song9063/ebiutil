@@ -32,26 +32,36 @@ import (
 // 	)
 // }
 
+type trailPoint struct {
+	pos   geom.Point
+	alpha float32
+}
+
 type Ball struct {
 	geom.Point         // Position(X,Y)
 	Z          float64 // Height(0=Ground)
 
 	Radius float64
 
-	VX, VY   float64 // Horizontal speed
-	VZ       float64 // Vertical speed
-	Gravity  float64
-	Bouncing bool
+	VX, VY    float64 // Horizontal speed
+	VZ        float64 // Vertical speed
+	Gravity   float64
+	Bouncing  bool
+	HasLanded bool
 
 	// Parameters
 	cfg BallConfig
+
+	// Trail Points
+	trail []trailPoint
 }
 
 type BallConfig struct {
 	// Physics
-	BounceDecay   float64 // 바운스 감쇠량
-	FrictionDecay float64 // 마찰 감쇠량
-	StopThreshold float64 // 멈춤 판정 속도
+	BounceDecay    float64 // 바운스 감쇠량
+	FrictionDecay  float64 // 마찰 감쇠량
+	StopThreshold  float64 // 멈춤 판정 속도
+	MaxTrailPoints int
 
 	//
 	Color color.Color
@@ -59,10 +69,11 @@ type BallConfig struct {
 
 func DefaultBallConfig() BallConfig {
 	return BallConfig{
-		BounceDecay:   0.5,
-		FrictionDecay: 0.6,
-		StopThreshold: 0.1,
-		Color:         color.RGBA{0xff, 0xff, 0xff, 0xff},
+		BounceDecay:    0.5,
+		FrictionDecay:  0.6,
+		StopThreshold:  0.1,
+		Color:          color.RGBA{0xff, 0xff, 0xff, 0xff},
+		MaxTrailPoints: 5, // if 0, trail effect isn't working.
 	}
 }
 
@@ -103,6 +114,17 @@ func (b *Ball) Update() bool {
 	// 지면에 떨어짐
 	if b.Z <= 0 {
 		b.Z = 0 // 땅 밑으로 더 내려가지않게
+		b.HasLanded = true
+
+		if b.cfg.MaxTrailPoints > 0 {
+			b.trail = append(b.trail, trailPoint{
+				pos:   b.Point,
+				alpha: 0.5,
+			})
+			if len(b.trail) > b.cfg.MaxTrailPoints {
+				b.trail = b.trail[1:]
+			}
+		}
 
 		// 수직 속도를 반대로 감쇠시킴
 		// 곱하는 값은 튀어오르는 힘(1이면 영원히 튀게됨)
@@ -132,6 +154,12 @@ func (b *Ball) Update() bool {
 		return true
 	}
 
+	if len(b.trail) > 0 {
+		for i := range b.trail {
+			b.trail[i].alpha -= 0.05
+		}
+	}
+
 	return false
 }
 
@@ -141,6 +169,14 @@ func (b *Ball) Draw(screen *ebiten.Image) {
 		float32(b.X), float32(b.Y),
 		radius,
 		b.cfg.Color, false)
+
+	for _, t := range b.trail {
+		if t.alpha <= 0 {
+			continue
+		}
+		clr := color.RGBA{0xff, 0xff, 0xff, uint8(t.alpha * 255)}
+		vector.FillCircle(screen, float32(t.pos.X), float32(t.pos.Y), float32(b.Radius*0.7), clr, false)
+	}
 }
 
 // 볼 착지지점 계산
