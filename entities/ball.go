@@ -56,6 +56,16 @@ type Ball struct {
 	trail []trailPoint
 }
 
+func (b *Ball) Reset() {
+	b.VX = 0
+	b.VY = 0
+	b.VZ = 0
+	b.Z = 0
+	b.Bouncing = false
+	b.HasLanded = false
+	b.trail = b.trail[:0]
+}
+
 type BallConfig struct {
 	// Physics
 	BounceDecay    float64 // 바운스 감쇠량

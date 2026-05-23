@@ -44,3 +44,18 @@ func VelocityFromAngle(angleRad, speed float64) (vx, vy float64) {
 	return math.Cos(angleRad) * speed,
 		-math.Sin(angleRad) * speed
 }
+
+func VelocityFromPoints(from, to geom.Point, GRAVITY, speed, vzCAP float64) (vx, vy, vz float64) {
+	dx := to.X - from.X
+	dy := to.Y - from.Y
+	dist := math.Sqrt(dx*dx + dy*dy)
+	if dist == 0 {
+		return 0, 0, 0
+	}
+
+	landingTime := dist / speed
+	VZ := math.Min(landingTime*GRAVITY/2, vzCAP)
+	VX := dx / landingTime
+	VY := dy / landingTime
+	return VX, VY, VZ
+}
