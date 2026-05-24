@@ -11,6 +11,11 @@ func RandomFloat64(min, max float64) float64 {
 	return min + rand.Float64()*(max-min)
 }
 
+// Return -1 or 1
+func RandomDir() int {
+	return []int{-1, 1}[rand.IntN(2)]
+}
+
 func DistanceSQ(x1, y1, x2, y2 float64) float64 {
 	dx := x2 - x1
 	dy := y2 - y1

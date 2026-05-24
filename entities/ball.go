@@ -43,9 +43,16 @@ type Ball struct {
 
 	Radius float64
 
-	VX, VY    float64 // Horizontal speed
-	VZ        float64 // Vertical speed
-	Gravity   float64
+	// Physics
+	VX, VY  float64 // Horizontal speed
+	VZ      float64 // Vertical speed
+	Gravity float64
+
+	// for Curve
+	CurveX float64
+	CurveY float64
+
+	// Results
 	Bouncing  bool
 	HasLanded bool
 
@@ -61,9 +68,12 @@ func (b *Ball) Reset() {
 	b.VY = 0
 	b.VZ = 0
 	b.Z = 0
+	b.CurveX = 0
+	b.CurveY = 0
 	b.Bouncing = false
 	b.HasLanded = false
 	b.trail = b.trail[:0]
+	b.cfg.NoFriction = false
 }
 
 type BallConfig struct {
@@ -72,6 +82,8 @@ type BallConfig struct {
 	FrictionDecay  float64 // 마찰 감쇠량
 	StopThreshold  float64 // 멈춤 판정 속도
 	MaxTrailPoints int
+
+	NoFriction bool // 마찰 무시
 
 	//
 	Color color.Color
@@ -82,12 +94,22 @@ func DefaultBallConfig() BallConfig {
 		BounceDecay:    0.5,
 		FrictionDecay:  0.6,
 		StopThreshold:  0.1,
+		NoFriction:     false,
 		Color:          color.RGBA{0xff, 0xff, 0xff, 0xff},
 		MaxTrailPoints: 5, // if 0, trail effect isn't working.
 	}
 }
 
 func NewBall(pos geom.Point, radius, vx, vy, vz, gravity float64, cfg BallConfig) *Ball {
+	return NewCurveBall(pos, radius,
+		vx, vy, vz, 0, 0, gravity, cfg)
+}
+
+func NewCurveBall(pos geom.Point, radius,
+	vx, vy, vz,
+	curveX, curveY,
+	gravity float64,
+	cfg BallConfig) *Ball {
 	return &Ball{
 		Point:    pos,
 		Z:        0,
@@ -95,6 +117,8 @@ func NewBall(pos geom.Point, radius, vx, vy, vz, gravity float64, cfg BallConfig
 		VX:       vx,
 		VY:       vy,
 		VZ:       vz,
+		CurveX:   curveX,
+		CurveY:   curveY,
 		Gravity:  gravity,
 		Bouncing: false,
 		cfg:      cfg,
@@ -106,7 +130,10 @@ func (b *Ball) Stop() {
 	b.VY = 0
 	b.VZ = 0
 	b.Z = 0
+	b.CurveX = 0
+	b.CurveY = 0
 	b.Bouncing = false
+	b.cfg.NoFriction = false
 }
 
 // return true if stopped at target
@@ -118,6 +145,9 @@ func (b *Ball) Update() bool {
 	b.Y += b.VY * dt
 	b.Z += b.VZ * dt
 
+	b.VX += b.CurveX * dt
+	b.VY += b.CurveY * dt
+
 	// 중력에 의해 수직속도 점점 감소, 음수가 되면 아래로 떨어지게됨
 	b.VZ -= b.Gravity * dt
 
@@ -125,6 +155,11 @@ func (b *Ball) Update() bool {
 	if b.Z <= 0 {
 		b.Z = 0 // 땅 밑으로 더 내려가지않게
 		b.HasLanded = true
+
+		if b.cfg.NoFriction {
+			b.Stop()
+			return true
+		}
 
 		if b.cfg.MaxTrailPoints > 0 {
 			b.trail = append(b.trail, trailPoint{
