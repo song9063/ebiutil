@@ -47,6 +47,12 @@ func (r Rect) Center() Point {
 		Y: r.CenterY(),
 	}
 }
+func (r *Rect) SetCenter(center Point) {
+	r.Point = Point{
+		X: center.X - r.W/2,
+		Y: center.Y - r.H/2,
+	}
+}
 func (r Rect) HitTest(p Point) bool {
 	return (p.X >= r.X && p.X <= r.Right() &&
 		p.Y >= r.Y && p.Y <= r.Bottom())

@@ -8,7 +8,48 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/examples/resources/fonts"
 	textv2 "github.com/hajimehoshi/ebiten/v2/text/v2"
+	"github.com/song9063/ebiutil/geom"
 )
+
+type TextWithGeom struct {
+	Rect geom.Rect
+	text string
+	Face *textv2.GoTextFace
+}
+
+func MakeTextWithGeom(txt string, face *textv2.GoTextFace,
+	pos geom.Point) *TextWithGeom {
+	w, h := textv2.Measure(txt, face, 0)
+	return &TextWithGeom{
+		Rect: geom.Rect{
+			Point: pos,
+			W:     w, H: h,
+		},
+		text: txt,
+		Face: face,
+	}
+}
+func MakeTextWithGeomCenter(txt string, face *textv2.GoTextFace,
+	center geom.Point) *TextWithGeom {
+	txtW := MakeTextWithGeom(txt, face, center)
+	// txtW.Rect.SetCenter(center)
+	txtW.SetCenter(center)
+	return txtW
+}
+func (t *TextWithGeom) SetCenter(center geom.Point) {
+	t.Rect.SetCenter(center)
+}
+func (t *TextWithGeom) SetText(txt string) {
+	t.text = txt
+	w, h := textv2.Measure(txt, t.Face, 0)
+	center := t.Rect.Center()
+	t.Rect.W = w
+	t.Rect.H = h
+	t.Rect.SetCenter(center)
+}
+func (t *TextWithGeom) GetText() string {
+	return t.text
+}
 
 var (
 	fontSource *textv2.GoTextFaceSource
