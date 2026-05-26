@@ -7,6 +7,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 	"github.com/song9063/ebiutil/geom"
+	"github.com/song9063/ebiutil/utils"
 )
 
 // Usage
@@ -138,7 +139,7 @@ func (b *Ball) Stop() {
 
 // return true if stopped at target
 func (b *Ball) Update() bool {
-	dt := 1.0 / ebiten.ActualTPS()
+	dt := utils.ActualDeltaTime()
 
 	// X,Y,Z 변화
 	b.X += b.VX * dt

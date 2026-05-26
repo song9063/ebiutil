@@ -80,7 +80,7 @@ func (s *Sprite) Update() bool {
 		return true
 	}
 
-	dt := 1.0 / ebiten.ActualTPS()
+	dt := utils.ActualDeltaTime()
 	dist := math.Sqrt(dsq)
 	spd := math.Min(s.Speed*dt, dist)
 	s.X += (s.target.X - s.X) / dist * spd

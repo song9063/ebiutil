@@ -7,6 +7,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/song9063/ebiutil/geom"
+	"github.com/song9063/ebiutil/utils"
 )
 
 type EffectType int
@@ -97,7 +98,7 @@ func (b *Banner) Update() {
 		return
 	}
 
-	dt := 1.0 / ebiten.ActualTPS()
+	dt := utils.ActualDeltaTime()
 	b.timer -= dt
 
 	switch b.cfg.Effect {
