@@ -3,7 +3,6 @@ package sprites
 import (
 	"math"
 
-	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/song9063/ebiutil/geom"
 	"github.com/song9063/ebiutil/utils"
 )
