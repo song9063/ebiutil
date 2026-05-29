@@ -56,6 +56,7 @@ var (
 	SmallFace     *textv2.GoTextFace
 	LessSmallFace *textv2.GoTextFace
 	NormalFace    *textv2.GoTextFace
+	MediumFace    *textv2.GoTextFace
 	BigFace       *textv2.GoTextFace
 )
 
@@ -78,6 +79,10 @@ func init() {
 	NormalFace = &textv2.GoTextFace{
 		Source: fontSource,
 		Size:   16,
+	}
+	MediumFace = &textv2.GoTextFace{
+		Source: fontSource,
+		Size:   24,
 	}
 	BigFace = &textv2.GoTextFace{
 		Source: fontSource,
