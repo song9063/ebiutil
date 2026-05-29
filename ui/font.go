@@ -52,10 +52,11 @@ func (t *TextWithGeom) GetText() string {
 }
 
 var (
-	fontSource *textv2.GoTextFaceSource
-	SmallFace  *textv2.GoTextFace
-	NormalFace *textv2.GoTextFace
-	BigFace    *textv2.GoTextFace
+	fontSource    *textv2.GoTextFaceSource
+	SmallFace     *textv2.GoTextFace
+	LessSmallFace *textv2.GoTextFace
+	NormalFace    *textv2.GoTextFace
+	BigFace       *textv2.GoTextFace
 )
 
 func init() {
@@ -69,6 +70,10 @@ func init() {
 	SmallFace = &textv2.GoTextFace{
 		Source: fontSource,
 		Size:   10,
+	}
+	LessSmallFace = &textv2.GoTextFace{
+		Source: fontSource,
+		Size:   13,
 	}
 	NormalFace = &textv2.GoTextFace{
 		Source: fontSource,
