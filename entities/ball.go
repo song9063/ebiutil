@@ -5,6 +5,7 @@ import (
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 	"github.com/song9063/ebiutil/geom"
 	"github.com/song9063/ebiutil/utils"
@@ -62,6 +63,9 @@ type Ball struct {
 
 	// Trail Points
 	trail []trailPoint
+
+	// assets
+	image *ebiten.Image
 }
 
 func (b *Ball) Reset() {
@@ -101,16 +105,20 @@ func DefaultBallConfig() BallConfig {
 	}
 }
 
-func NewBall(pos geom.Point, radius, vx, vy, vz, gravity float64, cfg BallConfig) *Ball {
+func NewBall(pos geom.Point, radius, vx, vy, vz, gravity float64, cfg BallConfig, imgSrc string) *Ball {
 	return NewCurveBall(pos, radius,
-		vx, vy, vz, 0, 0, gravity, cfg)
+		vx, vy, vz, 0, 0, gravity, cfg, imgSrc)
 }
 
 func NewCurveBall(pos geom.Point, radius,
 	vx, vy, vz,
 	curveX, curveY,
 	gravity float64,
-	cfg BallConfig) *Ball {
+	cfg BallConfig, imgSrc string) *Ball {
+	var ballImg *ebiten.Image = nil
+	if len(imgSrc) > 0 {
+		ballImg, _, _ = ebitenutil.NewImageFromFile(imgSrc)
+	}
 	return &Ball{
 		Point:    pos,
 		Z:        0,
@@ -123,6 +131,7 @@ func NewCurveBall(pos geom.Point, radius,
 		Gravity:  gravity,
 		Bouncing: false,
 		cfg:      cfg,
+		image:    ballImg,
 	}
 }
 
@@ -210,12 +219,6 @@ func (b *Ball) Update() bool {
 }
 
 func (b *Ball) Draw(screen *ebiten.Image) {
-	radius := float32(b.Radius + b.Z*0.05)
-	vector.FillCircle(screen,
-		float32(b.X), float32(b.Y),
-		radius,
-		b.cfg.Color, false)
-
 	for _, t := range b.trail {
 		if t.alpha <= 0 {
 			continue
@@ -223,6 +226,25 @@ func (b *Ball) Draw(screen *ebiten.Image) {
 		clr := color.RGBA{0xff, 0xff, 0xff, uint8(t.alpha * 255)}
 		vector.FillCircle(screen, float32(t.pos.X), float32(t.pos.Y), float32(b.Radius*0.7), clr, false)
 	}
+	radius := float32(b.Radius + b.Z*0.05)
+
+	if b.image != nil {
+		scale := 1.0 + b.Z*0.001
+		w := float64(b.image.Bounds().Dx())
+		h := float64(b.image.Bounds().Dy())
+
+		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Translate(-w/2, -h/2)
+		op.GeoM.Scale(scale, scale)
+		op.GeoM.Translate(b.X, b.Y)
+		screen.DrawImage(b.image, op)
+	} else {
+		vector.FillCircle(screen,
+			float32(b.X), float32(b.Y),
+			radius,
+			b.cfg.Color, false)
+	}
+
 }
 
 // 볼 착지지점 계산
